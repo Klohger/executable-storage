@@ -1,6 +1,3 @@
-# Executable Storage
-
-```rust
 #![feature(generic_const_exprs)]
 use executable_storage::{Entry, ExecutableStorage};
 
@@ -32,4 +29,3 @@ fn main() {
         },
     }
 }
-```
