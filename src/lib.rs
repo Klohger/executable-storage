@@ -8,7 +8,7 @@ use std::{
 };
 
 #[repr(C)]
-pub struct StaticStorage<T, const PREFIX_SIZE: usize> {
+pub struct Entry<T, const PREFIX_SIZE: usize> {
     pub prefix: [u8; PREFIX_SIZE],
     pub value: T,
 }
@@ -17,7 +17,7 @@ pub struct ExecutableStorage<'a, const PREFIX_SIZE: usize, T: 'a>
 where
     [u8; size_of::<T>()]:,
 {
-    static_storage: &'a mut StaticStorage<T, PREFIX_SIZE>,
+    entry: &'a mut Entry<T, PREFIX_SIZE>,
     file: BufWriter<File>,
     location: u64,
     _phantom_data: PhantomData<T>,
@@ -28,7 +28,7 @@ where
     [u8; size_of::<T>()]:,
 {
     fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.static_storage.value
+        &mut self.entry.value
     }
 }
 
@@ -39,7 +39,7 @@ where
     type Target = T;
 
     fn deref(&self) -> &Self::Target {
-        &self.static_storage.value
+        &self.entry.value
     }
 }
 
@@ -47,7 +47,7 @@ impl<'a, const PREFIX_SIZE: usize, T: 'a> ExecutableStorage<'a, PREFIX_SIZE, T>
 where
     [u8; size_of::<T>()]:,
 {
-    pub fn new(static_storage: &'static mut StaticStorage<T, PREFIX_SIZE>) -> io::Result<Self>
+    pub fn new(entry: &'a mut Entry<T, PREFIX_SIZE>) -> io::Result<Self>
     where
         [u8; PREFIX_SIZE - 1]:,
     {
@@ -64,9 +64,9 @@ where
 
                 reader.read_exact(&mut buf[0..1])?;
 
-                if buf[0] == static_storage.prefix[0] {
+                if buf[0] == entry.prefix[0] {
                     reader.read_exact(&mut buf[1..])?;
-                    if buf[1..] == static_storage.prefix[1..] {
+                    if buf[1..] == entry.prefix[1..] {
                         break reader.seek(std::io::SeekFrom::Current(0))?;
                     }
                 }
@@ -74,7 +74,7 @@ where
         };
 
         Ok(Self {
-            static_storage,
+            entry,
             file: BufWriter::new(file),
             location,
             _phantom_data: PhantomData,
@@ -84,13 +84,13 @@ where
         self.file.seek(io::SeekFrom::Start(self.location))?;
 
         let data = unsafe {
-            (&mut self.static_storage.value as *mut _ as *mut [u8; size_of::<T>()])
+            (&mut self.entry.value as *mut _ as *mut [u8; size_of::<T>()])
                 .as_mut()
                 .unwrap_unchecked()
         };
 
         self.file.write(data)?;
-
+        self.file.flush()?;
         Ok(())
     }
 }
