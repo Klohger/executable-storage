@@ -18,7 +18,7 @@ where
     [u8; size_of::<T>()]:,
 {
     entry: &'a mut Entry<T, PREFIX_SIZE>,
-    file: BufWriter<File>,
+    file: File,
     location: u64,
     _phantom_data: PhantomData<T>,
 }
@@ -75,7 +75,7 @@ where
 
         Ok(Self {
             entry,
-            file: BufWriter::new(file),
+            file,
             location,
             _phantom_data: PhantomData,
         })
@@ -89,7 +89,7 @@ where
                 .unwrap_unchecked()
         };
 
-        self.file.write(data)?;
+        self.file.write_all(data)?;
         self.file.flush()?;
         Ok(())
     }
