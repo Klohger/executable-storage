@@ -9,6 +9,7 @@ static mut COUNTER: executable_storage::Entry<usize, 7> = Entry {
     prefix: *b"COUNTER",
     default_value: 0,
 };
+
 fn main() {
     let mut storage = ExecutableStorage::new(unsafe { &mut COUNTER }).unwrap();
 
