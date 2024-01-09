@@ -8,8 +8,8 @@ struct Settings {
     resolution : Option<(usize, usize)>,
 }
 
-static mut SETTINGS: executable_storage::Entry<Settings, 7> = Entry {
-    prefix: *b"COUNTER",
+static mut SETTINGS: executable_storage::Entry<Settings, 8> = Entry {
+    prefix: *b"SETTINGS",
     default_value: Settings {
         resolution: None,
     },
