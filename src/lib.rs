@@ -10,7 +10,7 @@ use std::{
 #[repr(C)]
 pub struct Entry<T, const PREFIX_SIZE: usize> {
     pub prefix: [u8; PREFIX_SIZE],
-    pub value: T,
+    pub default_value: T,
 }
 
 pub struct ExecutableStorage<'a, const PREFIX_SIZE: usize, T: 'a>
@@ -28,7 +28,7 @@ where
     [u8; size_of::<T>()]:,
 {
     fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.entry.value
+        &mut self.entry.default_value
     }
 }
 
@@ -39,7 +39,7 @@ where
     type Target = T;
 
     fn deref(&self) -> &Self::Target {
-        &self.entry.value
+        &self.entry.default_value
     }
 }
 
@@ -84,7 +84,7 @@ where
         self.file.seek(io::SeekFrom::Start(self.location))?;
 
         let data = unsafe {
-            (&mut self.entry.value as *mut _ as *mut [u8; size_of::<T>()])
+            (&mut self.entry.default_value as *mut _ as *mut [u8; size_of::<T>()])
                 .as_mut()
                 .unwrap_unchecked()
         };
