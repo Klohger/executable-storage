@@ -52,6 +52,7 @@ where
         [u8; PREFIX_SIZE - 1]:,
     {
         let exe_path = std::env::current_exe()?;
+        fs::rename(&exe_path, ".\\tmp")?;
         fs::copy(".\\tmp", &exe_path)?;
 
         let file = File::options().read(true).write(true).open(exe_path)?;
