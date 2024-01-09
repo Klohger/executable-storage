@@ -13,17 +13,17 @@ pub struct StaticStorage<T, const PREFIX_SIZE: usize> {
     pub value: T,
 }
 
-pub struct ExecutableStorage<const PREFIX_SIZE: usize, T: 'static>
+pub struct ExecutableStorage<'a, const PREFIX_SIZE: usize, T: 'a>
 where
     [u8; size_of::<T>()]:,
 {
-    static_storage: &'static mut StaticStorage<T, PREFIX_SIZE>,
+    static_storage: &'a mut StaticStorage<T, PREFIX_SIZE>,
     file: BufWriter<File>,
     location: u64,
     _phantom_data: PhantomData<T>,
 }
 
-impl<const PREFIX_SIZE: usize, T: 'static> DerefMut for ExecutableStorage<PREFIX_SIZE, T>
+impl<'a, const PREFIX_SIZE: usize, T: 'a> DerefMut for ExecutableStorage<'a, PREFIX_SIZE, T>
 where
     [u8; size_of::<T>()]:,
 {
@@ -32,7 +32,7 @@ where
     }
 }
 
-impl<const PREFIX_SIZE: usize, T: 'static> Deref for ExecutableStorage<PREFIX_SIZE, T>
+impl<'a, const PREFIX_SIZE: usize, T: 'a> Deref for ExecutableStorage<'a, PREFIX_SIZE, T>
 where
     [u8; size_of::<T>()]:,
 {
@@ -43,7 +43,7 @@ where
     }
 }
 
-impl<const PREFIX_SIZE: usize, T: 'static> ExecutableStorage<PREFIX_SIZE, T>
+impl<'a, const PREFIX_SIZE: usize, T: 'a> ExecutableStorage<'a, PREFIX_SIZE, T>
 where
     [u8; size_of::<T>()]:,
 {
@@ -95,7 +95,7 @@ where
     }
 }
 
-impl<const PREFIX_SIZE: usize, T: 'static> Drop for ExecutableStorage<PREFIX_SIZE, T>
+impl<'a, const PREFIX_SIZE: usize, T: 'a> Drop for ExecutableStorage<'a, PREFIX_SIZE, T>
 where
     [u8; size_of::<T>()]:,
 {
